@@ -2,121 +2,193 @@
 #include<sstream>
 #include<fstream>
 #include<list>
-#include <GL/glut.h>
+#include<vector>
+#include<math.h> 
+#include<GL/glut.h>
 
 #include "ClassObject.h"
+
 #define NUMMAX 50
-
-/*Global variables for the Objects*/
-Object3D array[NUMMAX];
-/*Number of objects*/
-int end;
-
-
 
 using namespace std;
 
-int loadFile(char *nf, Object3D  array[]);
+/*Global variables for the Objects and its size*/
+Object3D array[NUMMAX];
+static int end;
+
+/*Refresh period in milliseconds*/
+int refreshMillis = 20;
+
+/*Variable of the visualisation*/
+float xAxis=0, yAxis=0, zAxis=-1.75;
+
+/*Global variables for rotate*/
+double Rf[4][4];
+double theta;
+double alpha;
+double gamma;
+
+
+/*OPENGL FUNCTIONS*/
 void init (void);
 void display(void);
+void Timer(int value) ;
+void mouse(int button, int state, int x, int y);
+void keyboard (unsigned char key, int x, int y);
+
+/*MY FUNCTIONS*/
+int loadFile(char *nf, Object3D  array[]);	//Read the OBJ file
+void translate(Object3D array[], int size, float xt, float yt, float zt);	//Translate the points
+void rotate(Object3D array[], int end, double Rf[4][4], double theta, double alpha, double gamma);
+void rotateAnimation(Object3D array[], int end, double Rf[4][4], double theta, double alpha, double gamma, int opc);
+void visibleface(Object3D array[], int end, double vsx, double vsy, double vsz);
 
 int main(int argc, char **argv){
+	
+	/*int element;
+	cout << "....:::: ATOM PROJECT ::::...." << endl;
+	
+	cout << endl << "1.- HYDROGEN [H] \t 2.- HELIUM [He] \t 3.- LITHIUM [Li]" << endl;
+	
+	cout << endl << "Enter a number according to the menu: ";
+	cin >> element;
+	
+	switch(element){
+		case 1:
+				end = loadFile("2.obj", array);
+				break;
+		case 2:
+				end = loadFile("2.obj", array);
+				break;
+		case 3: 
+				end = loadFile("2.obj", array);
+				break;
+		default:
+				cout << endl << "....:::: INCORRECT OPTION ::::....";
+				exit(0);
+				break;
+	}
+	*/
+	end = loadFile("2.obj", array);
+	
 	/*Fuctions for display screen*/
 	glutInit(&argc, argv);
     glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize (400, 400); 
-    glutInitWindowPosition (100, 100);
-    glutCreateWindow ("OBJ READER");
+    glutInitWindowSize (750, 650); 
+    glutInitWindowPosition (200, 0);
+    glutCreateWindow ("ATOM PROJECT");
     init ();
-    
-	end = loadFile("four_figs.obj", array);
-	//cube.vertices[cube.faces[i].vert[j]].x
 	
-	glScalef(0.5,0.5,0.5);
+	glutTimerFunc(0, Timer, 0);
 	glutDisplayFunc(display); 
-	
+//	glutMouseFunc(mouse);
     glutMainLoop();
+    
 	return 0;
 }
 
-/*
-cout << array[0].name << endl;
-	list<Vertex>::iterator it;
-	it = array[0].v.begin();
-	for(it;  it!=array[0].v.end(); it++){
-		it->printvertex();
-	}
-	
-	cout << array[1].name << endl;
-	list<Vertex>::iterator it2;
-	it2 = array[1].v.begin();
-	for(it2;  it2!=array[1].v.end(); it2++){
-		it2->printvertex();
-	}
-*/
 
 void init (void) 
 {
 /*  select clearing (background) color       */
-    glClearColor (0.0, 0.0, 0.0, 0.0);
-
-/*  initialize viewing values  */
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
-    glRotatef (30.0, 1.0, 1.0, 1.0);
-    //gluOrtho2D(0.0, 1.0, 0.0, 1.0);
+    glClearColor(0.1, 0.39, 0.88, 1.0);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(-1, 1, -1, 1, 1, 60);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	
+	translate(array, end, xAxis, yAxis, zAxis);
+	
+	//glRotatef(30, 0.0, 1.0, 1.0);
+	//rotate(array, end, Rf, 0, .0, .1);
+	for(int i = 0; i <= end; i++)
+	cout << array[i].name << " " << i << endl;
+	//gluLookAt(0, 0, 0, 0, 0, -1, 0, 1, 0);
 }
+
 
 void display(void)
 {
-/*  clear all pixels  */
-    glClear (GL_COLOR_BUFFER_BIT);
-	glPushMatrix();
+	
+	glClear (GL_COLOR_BUFFER_BIT);	//Clean the screen for the atom.
+
+	/*  color of the all pixels  */
     glColor3f (1.0, 1.0, 1.0);
-    //glBegin(GL_POLYGON);
-    //glBegin(GL_POINTS);
-	//cube.vertices[cube.faces[i].vert[j]].x
-	int vi = 0; 	//Cursor del array
-	Vertice *vtx = NULL;
-	/*Hacemos el arreglo de vertices dinamico*/
-	vtx = new Vertice[10000];
-	/*Recorremos todos los objetos del archivo*/
-	for(int i = 0; i <= end; i++){
+	
+    //Normal Variables
+	int contvertices=0;
+	Vertice Nv[3];
+    
+    Vertice *vtx = NULL;
+    vtx = new Vertice[100000];
+    int vi=0;
+
+	for(int i = 0; i <= end; i++){ //Object Layer
 		
-		//cout << array[i].name << endl;
-		
-		/*Vaciamos la lista de vertices del objeto a un array para hacer mas facil su manipulacion*/
-		
-		list<Vertice>::iterator it;
-		it = array[i].v.begin();
-		for(it, vi;  it!=array[i].v.end(); it++, vi++){
-			vtx[vi].setX(it->getX());
-			vtx[vi].setY(it->getY());
-			vtx[vi].setZ(it->getZ());
-			//cout << vtx[vi].getX() << " " << vtx[vi].getY() << " " << vtx[vi].getZ() << endl;
+		for(int x=0; x < array[i].v.size(); x++, vi++){
+			vtx[vi].x = array[i].v[x].x;
+			vtx[vi].y = array[i].v[x].y;
+			vtx[vi].z = array[i].v[x].z;
 		}
-		//limpiamos la lista de vertices de nuestro objeto para asi ahorrar memoria
-		array[i].v.clear();
+
 		/*Recorremos las caras de la lista*/
 		list<Faces>::iterator jt;
 		jt = array[i].f.begin();
+		
 		for(jt; jt!=array[i].f.end(); jt++){
 			
-			list<int>::iterator il;
-			il = jt->intls.begin();
+			list<int>::iterator il;		
+			il 	= jt->intls.begin();
+
+			//--- Draw the faces that are greater than zero. --------------------------
+			
 			glBegin(GL_LINE_LOOP);
+			if(jt->vision > 0)
 			while(il != jt->intls.end()){
-				glVertex3f(vtx[*il].getX(), vtx[*il].getY(), vtx[*il].getZ());
+				glVertex3f(vtx[*il].x, vtx[*il].y, vtx[*il].z);
 				il++;
 			}
 			glEnd();
+			//-------------------------------------------------------------------------
 		}
-		glPopMatrix();
-		glutSwapBuffers ();
+		
+		
+
 	}
- 	
+	glutSwapBuffers ();	
+	vtx = NULL;
 }
+
+void Timer(int value) 
+{
+	//gluLookAt(.1, 0, 0, 0, 0, -1.75, 0, 1, 0);
+	/*Points of the pivot*/
+	double dx = 0;
+	double dy = 0;
+	double dz = 0;
+	
+	/*---Translation to the origin---*/
+	dx = dx * -1;	dy = dy * -1;	dz = dz * -1;
+	translate(array, end, dx, dy, dz);
+	
+	//zAxis = zAxis / .1;
+	/*--------------------------------------------------------------------------------*/
+	visibleface(array, end, xAxis, yAxis, zAxis);
+	rotateAnimation(array, end, Rf, theta, alpha, gamma, 0);
+	/*--------------------------------------------------------------------------------*/
+	
+	/*---Translation to the original position---*/
+	dx = dx * -1;	dy = dy * -1;	dz = dz * -1;
+	translate(array, end, dx, dy, dz);
+	
+	/*--Redisplay the figures then of the first loop in mainloop*/
+    glutPostRedisplay();
+    // subsequent timer call at milliseconds
+    glutTimerFunc(refreshMillis, Timer, 0);
+
+}
+
 
 
 

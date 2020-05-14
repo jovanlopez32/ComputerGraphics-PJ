@@ -2,10 +2,14 @@
 #include<sstream>
 #include<fstream>
 #include<list>
+#include<vector>
+
 using namespace std;
 
+
 class Vertice {
-	private:
+	//private:
+	public:
 		double x, y, z;
 	public:
 		Vertice ();
@@ -22,6 +26,8 @@ class Vertice {
 class Faces {
 	public:
 		list<int> intls;
+		Vertice normal;
+		double vision;
 	public:
 		Faces(list<int> ls);
 		void printfaces();
@@ -30,8 +36,9 @@ class Faces {
 class Object3D {
 	public:
 		string name;
-		list<Vertice> v;
+		vector<Vertice> v;
 		list<Faces> f;
 		void printEverything();
 };
+
 

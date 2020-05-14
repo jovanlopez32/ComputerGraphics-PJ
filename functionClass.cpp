@@ -54,10 +54,11 @@ void Object3D::printEverything(){
 	/*print name of object*/
 	cout << name << endl;
 	/*printf the vertex*/
-	list<Vertice>::iterator itV;
-	for(itV = v.begin(); itV != v.end(); itV++){
-		itV->printvertex();
+	int i=0;
+	for(int i; i < v.size(); i++){
+		v[i].printvertex();
 	}
+
 	/*print the faces*/
 	list<Faces>::iterator itF;
 	for(itF = f.begin(); itF != f.end(); itF++){

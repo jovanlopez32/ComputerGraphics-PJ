@@ -20,7 +20,7 @@ static int end;
 int refreshMillis = 20;
 
 /*Variable of the visualisation*/
-float xAxis=0, yAxis=0, zAxis=-1.75;
+float xAxis=2, yAxis=.5, zAxis=-1.75;
 
 /*Global variables for rotate*/
 double Rf[4][4];
@@ -42,6 +42,7 @@ void translate(Object3D array[], int size, float xt, float yt, float zt);	//Tran
 void rotate(Object3D array[], int end, double Rf[4][4], double theta, double alpha, double gamma);
 void rotateAnimation(Object3D array[], int end, double Rf[4][4], double theta, double alpha, double gamma, int opc);
 void visibleface(Object3D array[], int end, double vsx, double vsy, double vsz);
+void illumination(Object3D array[], int end, Vertice L);
 
 int main(int argc, char **argv){
 	
@@ -94,17 +95,20 @@ void init (void)
     glClearColor(0.1, 0.39, 0.88, 1.0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glFrustum(-1, 1, -1, 1, 1, 60);
+	glFrustum(-1, 1, -1, 1, 1, 10);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
-	translate(array, end, xAxis, yAxis, zAxis);
 	
+	glTranslatef(0, 0, zAxis);
+	//translate(array, end, xAxis, yAxis, zAxis);
+	//glRotatef(190, 0, 1, 0);
 	//glRotatef(30, 0.0, 1.0, 1.0);
 	//rotate(array, end, Rf, 0, .0, .1);
-	for(int i = 0; i <= end; i++)
-	cout << array[i].name << " " << i << endl;
+	//for(int i = 0; i <= end; i++)
+	//cout << array[i].name << " " << i << endl;
 	//gluLookAt(0, 0, 0, 0, 0, -1, 0, 1, 0);
+	gluLookAt(.2, 0, 0, xAxis, yAxis, zAxis, 0, 1, 0);
 }
 
 
@@ -143,8 +147,12 @@ void display(void)
 
 			//--- Draw the faces that are greater than zero. --------------------------
 			
+			//glColor3f (jt->color.r, jt->color.g, jt->color.b);
+			
+			
+			//glBegin(GL_QUADS);
 			glBegin(GL_LINE_LOOP);
-			if(jt->vision > 0)
+			if(jt->vision <= 0)
 			while(il != jt->intls.end()){
 				glVertex3f(vtx[*il].x, vtx[*il].y, vtx[*il].z);
 				il++;
@@ -152,9 +160,6 @@ void display(void)
 			glEnd();
 			//-------------------------------------------------------------------------
 		}
-		
-		
-
 	}
 	glutSwapBuffers ();	
 	vtx = NULL;
@@ -162,7 +167,7 @@ void display(void)
 
 void Timer(int value) 
 {
-	//gluLookAt(.1, 0, 0, 0, 0, -1.75, 0, 1, 0);
+
 	/*Points of the pivot*/
 	double dx = 0;
 	double dy = 0;
@@ -172,7 +177,7 @@ void Timer(int value)
 	dx = dx * -1;	dy = dy * -1;	dz = dz * -1;
 	translate(array, end, dx, dy, dz);
 	
-	//zAxis = zAxis / .1;
+	
 	/*--------------------------------------------------------------------------------*/
 	visibleface(array, end, xAxis, yAxis, zAxis);
 	rotateAnimation(array, end, Rf, theta, alpha, gamma, 0);

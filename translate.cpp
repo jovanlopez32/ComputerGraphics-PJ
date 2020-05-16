@@ -26,3 +26,5 @@ void translate(Object3D array[], int size, float xt, float yt, float zt){
 
 
 
+
+

@@ -43,8 +43,7 @@ void visibleface(Object3D array[], int end, double vsx, double vsy, double vsz){
 			Vertice Normal;
 			
 			Normal = Normal_Operation(v[0], v[1], v[2]);
-			lt->vision = (Normal.x*vsx)+(Normal.y*vsy)+(Normal.z*vsz);
-						
+			lt->vision = (Normal.x*vsx)+(Normal.y*vsy)+(Normal.z*vsz);		
 			cont = 0;
 				
 		}

@@ -44,7 +44,7 @@ void rotateAnimation(Object3D array[], int end, double Rf[4][4], double theta, d
 	
 	int counter = 0;
 	
-	theta = 0;	alpha = 0;	gamma = 0.1;
+	theta = 0;	alpha = 0.;	gamma = 0.1;
 	
 	/*if(opc == 0){	theta = 0;	alpha = 0;	gamma = 0.1;	}
 	else
@@ -72,6 +72,25 @@ void rotateAnimation(Object3D array[], int end, double Rf[4][4], double theta, d
 		array[0].v[counter].x = array2[0];
 		array[0].v[counter].y = array2[1];
 		array[0].v[counter].z = array2[2];
+		
+		counter++;	
+	}
+	counter = 0;
+	
+	theta = -0.1;	alpha = 0.;	gamma = 0;
+	RfMatrix(Rf, theta, gamma, alpha);
+	while(counter < array[4].v.size()){
+		
+		newarray[0] = array[4].v[counter].x;
+		newarray[1] = array[4].v[counter].y;
+		newarray[2] = array[4].v[counter].z;
+		newarray[3] = 1;
+		
+		array2 = multiplication(Rf, newarray);
+		
+		array[4].v[counter].x = array2[0];
+		array[4].v[counter].y = array2[1];
+		array[4].v[counter].z = array2[2];
 		
 		counter++;	
 	}

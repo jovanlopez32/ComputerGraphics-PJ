@@ -27,6 +27,7 @@ class Faces {
 	public:
 		list<int> intls;
 		Vertice normal;
+		//Color color;
 		double vision;
 	public:
 		Faces(list<int> ls);
